@@ -1,0 +1,154 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <ctime>
+#include <cstdlib>
+#include <random>
+#include <cctype>
+
+using namespace std;
+
+int k = 0;
+
+vector<int> generateAnswer() {
+
+    vector<int> digits;
+
+    for (int i = 0; i < 10; ++i) {
+        digits.push_back(i);
+    }
+
+    shuffle(digits.begin(), digits.end(),
+        default_random_engine((unsigned int)time(0)));
+
+    return vector<int>(digits.begin(), digits.begin() + k);
+}
+
+vector<int> parseGuess(string input) {
+
+    vector<int> guess;
+
+    for (int i = 0; i < k; i++) {
+        guess.push_back(input[i] - '0');
+    }
+
+    return guess;
+}
+
+pair<int, int> checkAB(vector<int>& answer, vector<int>& guess) {
+
+    int A = 0;
+    int B = 0;
+
+    for (int i = 0; i < k; ++i) {
+
+        if (guess[i] == answer[i]) {
+            A++;
+        }
+        else {
+
+            for (int j = 0; j < k; ++j) {
+
+                if (guess[i] == answer[j]) {
+                    B++;
+                }
+            }
+        }
+    }
+
+    return make_pair(A, B);
+}
+
+int main() {
+
+    cout << "Enter the number of digits:";
+    cin >> k;
+
+    vector<int> answer = generateAnswer();
+
+    string input;
+
+    cout << "Enter a " << k
+        << "-digit number with no repeated digits." << endl;
+
+    cout << "Example: ";
+
+    for (int i = 1; i <= k; i++) {
+        cout << i;
+    }
+
+    cout << endl;
+
+    while (true) {
+
+        cout << "Your guess: ";
+        cin >> input;
+
+        if (input.length() != k) {
+
+            cout << "Please enter exactly "
+                << k << " digits." << endl;
+
+            continue;
+        }
+
+        bool is_digit = true;
+
+        for (int i = 0; i < k; i++) {
+
+            if (!isdigit(input[i])) {
+
+                is_digit = false;
+                break;
+            }
+        }
+
+        if (!is_digit) {
+
+            cout << "Only numbers are allowed." << endl;
+            continue;
+        }
+
+        bool repeated = false;
+
+        for (int i = 0; i < k; i++) {
+
+            for (int j = i + 1; j < k; j++) {
+
+                if (input[i] == input[j]) {
+                    repeated = true;
+                }
+            }
+        }
+
+        if (repeated) {
+
+            cout << "Digits cannot be repeated." << endl;
+            continue;
+        }
+
+        vector<int> guess = parseGuess(input);
+
+        pair<int, int> result = checkAB(answer, guess);
+
+        int A = result.first;
+        int B = result.second;
+
+        cout << A << "A" << B << "B" << endl;
+
+        if (A == k) {
+
+            cout << "Congratulations! The answer is ";
+
+            for (int i = 0; i < k; i++) {
+                cout << answer[i];
+            }
+
+            cout << "!" << endl;
+
+            break;
+        }
+    }
+
+    return 0;
+}
