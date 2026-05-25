@@ -1,0 +1,128 @@
+#include <iostream>
+#include <conio.h>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <windows.h> 
+
+using namespace std;
+
+const int WIDTH = 20;
+const int HEIGHT = 20;
+
+struct Point {
+    int x, y;
+};
+
+class SnakeGame {
+private:
+    vector<Point> snake; 
+    Point food;          
+    char direction;      
+    bool gameOver;       
+
+    void spawnFood() {
+        food.x = rand() % WIDTH;
+        food.y = rand() % HEIGHT;
+    }
+
+    void draw() {
+        system("cls");
+        for (int i = 0; i < WIDTH + 2; i++) cout << "#";
+        cout << endl;
+
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++) {
+                if (x == 0) cout << "#"; 
+
+                if (x == food.x && y == food.y) {
+                    cout << "F"; 
+                } else {
+                    bool isSnake = false;
+                    for (size_t i = 0; i < snake.size(); i++) { 
+                        if (snake[i].x == x && snake[i].y == y) {
+                            cout << "O"; 
+                            isSnake = true;
+                            break;
+                        }
+                    }
+                    if (!isSnake) cout << " "; 
+                }
+
+                if (x == WIDTH - 1) cout << "#"; 
+            }
+            cout << endl;
+        }
+
+        for (int i = 0; i < WIDTH + 2; i++) cout << "#";
+        cout << endl;
+    }
+
+    void input() {
+        if (_kbhit()) {
+            char key = _getch();
+            switch (key) {
+                case 'w': if (direction != 's') direction = 'w'; break;
+                case 's': if (direction != 'w') direction = 's'; break;
+                case 'a': if (direction != 'd') direction = 'a'; break;
+                case 'd': if (direction != 'a') direction = 'd'; break;
+            }
+        }
+    }
+
+    void logic() {
+        Point newHead = snake[0];
+        switch (direction) {
+            case 'w': newHead.y--; break;
+            case 's': newHead.y++; break;
+            case 'a': newHead.x--; break;
+            case 'd': newHead.x++; break;
+        }
+
+        if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
+            gameOver = true;
+            return;
+        }
+
+        for (size_t i = 0; i < snake.size(); i++) {
+            if (snake[i].x == newHead.x && snake[i].y == newHead.y) {
+                gameOver = true;
+                return;
+            }
+        }
+
+        snake.insert(snake.begin(), newHead); 
+
+        if (newHead.x == food.x && newHead.y == food.y) {
+            spawnFood();
+        } else {
+            snake.pop_back(); 
+        }
+    }
+
+public:
+    SnakeGame() {
+        srand(static_cast<unsigned>(time(0)));
+        Point start = {WIDTH / 2, HEIGHT / 2};
+        snake.push_back(start); 
+        direction = 'd';        
+        gameOver = false;
+        spawnFood();           
+    }
+
+    void run() {
+        while (!gameOver) {
+            draw();
+            input();
+            logic();
+            Sleep(100); 
+        }
+        cout << "Game Over!" << endl;
+    }
+};
+
+int main() {
+    SnakeGame game;
+    game.run();
+    return 0;
+}
